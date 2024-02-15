@@ -12,9 +12,9 @@ environment:
 dependencies:
   firebase_analytics: ^10.4.4
   firebase_core: ^2.15.0
+  firebase_remote_config: ^4.2.5
   flutter:
     sdk: flutter
-  flutter_dotenv: ^5.1.0
   flutter_localizations:
     sdk: flutter
 
@@ -31,6 +31,5 @@ flutter:
   generate: true
 
   assets:
-    - .env
     # Add assets from the images directory to the application.
     - assets/images/

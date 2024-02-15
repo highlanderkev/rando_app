@@ -4,8 +4,6 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
@@ -45,41 +43,43 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static FirebaseOptions web = FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_WEB_API_KEY'] as String,
-    appId: dotenv.env['FIREBASE_APP_ID'] as String,
-    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] as String,
-    projectId: dotenv.env['FIREBASE_PROJECT_ID'] as String,
-    authDomain: dotenv.env['FIREBASE_AUTH_DOMAIN'] as String,
-    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] as String,
-    measurementId: dotenv.env['FIREBASE_MEASUREMENT_ID'] as String,
+  static FirebaseOptions web = const FirebaseOptions(
+    apiKey: 'AIzaSyBo7HoQasn2Bm7pZHrcBsdSFaYgj0bMPZk',
+    appId: '1:791307120893:ios:301b9a583447a7ec6c4e94',
+    messagingSenderId: '791307120893',
+    projectId: 'rando-app-highlanderkev',
+    authDomain: 'rando-app-highlanderkev.firebaseapp.com',
+    storageBucket: 'rando-app-highlanderkev.appspot.com',
+    measurementId: 'G-1C0F7JQNR8',
   );
 
-  static FirebaseOptions android = FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_ANDROID_API_KEY'] as String,
-    appId: dotenv.env['FIREBASE_APP_ID'] as String,
-    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] as String,
-    projectId: dotenv.env['FIREBASE_PROJECT_ID'] as String,
-    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] as String,
+  static FirebaseOptions android = const FirebaseOptions(
+    apiKey: 'AIzaSyDWoZ7tYGNRnnU8d4tnWDOuP1H_3lko93U',
+    appId: '1:791307120893:ios:301b9a583447a7ec6c4e94',
+    messagingSenderId: '791307120893',
+    projectId: 'rando-app-highlanderkev',
+    storageBucket: 'rando-app-highlanderkev.appspot.com',
   );
 
-  static FirebaseOptions ios = FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_IOS_API_KEY'] as String,
-    appId: dotenv.env['FIREBASE_APP_ID'] as String,
-    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] as String,
-    projectId: dotenv.env['FIREBASE_PROJECT_ID'] as String,
-    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] as String,
-    iosClientId: dotenv.env['FIREBASE_IOS_CLIENT_ID'] as String,
+  static FirebaseOptions ios = const FirebaseOptions(
+    apiKey: 'AIzaSyAwPUIUNeQxN4TYnKDGDi789kji2o5kFd8',
+    appId: '1:791307120893:ios:301b9a583447a7ec6c4e94',
+    messagingSenderId: '791307120893',
+    projectId: 'rando-app-highlanderkev',
+    storageBucket: 'rando-app-highlanderkev.appspot.com',
+    iosClientId:
+        '791307120893-vqh8pfnm08f1rkshjvtdj6rvvdnh708s.apps.googleusercontent.com',
     iosBundleId: 'com.example.randoApp',
   );
 
-  static FirebaseOptions macos = FirebaseOptions(
-    apiKey: dotenv.env['FIREBASE_MACOS_API_KEY'] as String,
-    appId: dotenv.env['FIREBASE_APP_ID'] as String,
-    messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] as String,
-    projectId: dotenv.env['FIREBASE_PROJECT_ID'] as String,
-    storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] as String,
-    iosClientId: dotenv.env['FIREBASE_IOS_MAC_CLIENT_ID'] as String,
+  static FirebaseOptions macos = const FirebaseOptions(
+    apiKey: 'AIzaSyAwPUIUNeQxN4TYnKDGDi789kji2o5kFd8',
+    appId: '1:791307120893:ios:301b9a583447a7ec6c4e94',
+    messagingSenderId: '791307120893',
+    projectId: 'rando-app-highlanderkev',
+    storageBucket: 'rando-app-highlanderkev.appspot.com',
+    iosClientId:
+        '791307120893-vlfipvcrper9ljhufs7f7dcmmfnjcrbe.apps.googleusercontent.com',
     iosBundleId: 'com.example.randoApp.RunnerTests',
   );
 }
