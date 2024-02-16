@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rando_app/src/auth/login_view.dart';
+import 'package:rando_app/src/random_cat/random_cat_details_view.dart';
 import 'package:rando_app/src/random_dog/random_dog_details_view.dart';
-import 'package:rando_app/src/video_player/video_player_view.dart';
+import 'package:rando_app/src/random_number/random_numer_details_view.dart';
 
 import 'auth/auth_controller.dart';
 import 'random_selection/random_item_details_view.dart';
@@ -82,6 +83,10 @@ class MyApp extends StatelessWidget {
                     return const RandomItemDetailsView();
                   case RandomDogDetailsView.routeName:
                     return const RandomDogDetailsView();
+                  case RandomNumberDetailsView.routeName:
+                    return const RandomNumberDetailsView();
+                  case RandomCatDetailsView.routeName:
+                    return const RandomCatDetailsView();
                   case RandomItemListView.routeName:
                   default:
                     return const RandomItemListView();
