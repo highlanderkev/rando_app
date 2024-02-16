@@ -15,7 +15,6 @@ class RandomDogDetailsView extends StatefulWidget {
 }
 
 class _RandomDogDetailsViewState extends State<RandomDogDetailsView> {
-
   @override
   void initState() {
     super.initState();
@@ -41,15 +40,16 @@ class _RandomDogDetailsViewState extends State<RandomDogDetailsView> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             RandomDog? randomDog = snapshot.data;
-            return VideoPlayerView(url: randomDog!.url);
+            if (randomDog!.isVideo) {
+              return VideoPlayerView(url: randomDog.url);
+            } else {
+              return Image(image: NetworkImage(randomDog.url));
+            }
           } else {
             return const Center(child: CircularProgressIndicator());
           }
         },
       )),
     );
-    // return const VideoPlayerView(
-    //     url:
-    //         'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4');
   }
 }

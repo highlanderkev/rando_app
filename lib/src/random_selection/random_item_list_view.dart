@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:rando_app/src/auth/login_button_view.dart';
 
 import '../settings/settings_view.dart';
 import 'selection_item.dart';
-import 'random_item_details_view.dart';
 // import '../components/login_button.dart';
 
 /// Displays a list of SampleItems.
@@ -11,9 +9,10 @@ class RandomItemListView extends StatelessWidget {
   const RandomItemListView({
     super.key,
     this.items = const [
-      SelectionItem(1, "Test 1", 'More Information Here', '/item'),
-      SelectionItem(2, "Random Dog Video", 'Get Random Dog', '/randomdog'),
-      SelectionItem(3, "Test 3", 'More Information Here', '/item')
+      SelectionItem(1, "Random Number", 'Get Random Number', '/randomnumber'),
+      SelectionItem(
+          2, "Random Dog Video/Image", 'Get Random Dog', '/randomdog'),
+      SelectionItem(3, "Random Cat Image", 'Get Random Cat', '/randomcat')
     ],
   });
 
@@ -64,8 +63,7 @@ class RandomItemListView extends StatelessWidget {
                 // Navigate to the details page. If the user leaves and returns to
                 // the app after it has been killed while running in the
                 // background, the navigation stack is restored.
-                Navigator.pushNamed(context, item.routeName,
-                    arguments: item);
+                Navigator.pushNamed(context, item.routeName, arguments: item);
               });
         },
       ),

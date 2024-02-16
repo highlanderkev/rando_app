@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'auth_controller.dart';
 import 'login_view.dart';
 
 class LoginButtonView extends StatelessWidget {
