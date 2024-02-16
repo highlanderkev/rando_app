@@ -1,20 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:rando_app/src/auth/login_view.dart';
+import 'package:rando_app/src/random_cat/random_cat_details_view.dart';
+import 'package:rando_app/src/random_dog/random_dog_details_view.dart';
+import 'package:rando_app/src/random_number/random_numer_details_view.dart';
 
-import 'sample_feature/sample_item_details_view.dart';
-import 'sample_feature/sample_item_list_view.dart';
+import 'auth/auth_controller.dart';
+import 'random_selection/random_item_details_view.dart';
+import 'random_selection/random_item_list_view.dart';
 import 'settings/settings_controller.dart';
 import 'settings/settings_view.dart';
 
 /// The Widget that configures your application.
 class MyApp extends StatelessWidget {
-  const MyApp({
-    super.key,
-    required this.settingsController,
-  });
+  const MyApp(
+      {super.key,
+      required this.settingsController,
+      required this.authController});
 
   final SettingsController settingsController;
+  final AuthController authController;
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +73,23 @@ class MyApp extends StatelessWidget {
               settings: routeSettings,
               builder: (BuildContext context) {
                 switch (routeSettings.name) {
+                  case LoginView.routeName:
+                    return LoginView(controller: authController);
                   case SettingsView.routeName:
                     return SettingsView(controller: settingsController);
-                  case SampleItemDetailsView.routeName:
-                    return const SampleItemDetailsView();
-                  case SampleItemListView.routeName:
+                  // case VideoPlayerView.routeName:
+                  //   return const VideoPlayerView();
+                  case RandomItemDetailsView.routeName:
+                    return const RandomItemDetailsView();
+                  case RandomDogDetailsView.routeName:
+                    return const RandomDogDetailsView();
+                  case RandomNumberDetailsView.routeName:
+                    return const RandomNumberDetailsView();
+                  case RandomCatDetailsView.routeName:
+                    return const RandomCatDetailsView();
+                  case RandomItemListView.routeName:
                   default:
-                    return const SampleItemListView();
+                    return const RandomItemListView();
                 }
               },
             );

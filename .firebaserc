@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "rando-app-highlanderkev"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }
