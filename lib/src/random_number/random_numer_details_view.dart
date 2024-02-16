@@ -23,8 +23,8 @@ class _RandomNumberDetailsViewState extends State<RandomNumberDetailsView> {
     getRandomNumber();
   }
 
-  Future<RandomNumber> getRandomNumber() async {
-    return await randomNumberService.fetchRandomNumber();
+  Future<int> getRandomNumber() async {
+    return await randomNumberService.generateRandomNumber();
   }
 
   @override
@@ -40,8 +40,8 @@ class _RandomNumberDetailsViewState extends State<RandomNumberDetailsView> {
         future: getRandomNumber(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            RandomNumber? randomNumber = snapshot.data;
-            return Center(child: Text(randomNumber!.random.toString()));
+            int? randomNumber = snapshot.data;
+            return Center(child: Text(randomNumber!.toString()));
           } else {
             return const Center(child: CircularProgressIndicator());
           }
