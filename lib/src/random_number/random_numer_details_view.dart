@@ -47,6 +47,11 @@ class _RandomNumberDetailsViewState extends State<RandomNumberDetailsView> {
           }
         },
       )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() {}),
+        tooltip: 'Regenerate',
+        child: const Icon(Icons.replay),
+      ),
     );
   }
 }

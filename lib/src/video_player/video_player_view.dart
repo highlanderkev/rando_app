@@ -28,8 +28,8 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder(
+    return Stack(children: [
+      FutureBuilder(
           future: _initializeVideoPlayerFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.done) {
@@ -40,7 +40,7 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
               return const Center(child: CircularProgressIndicator());
             }
           }),
-      floatingActionButton: FloatingActionButton(
+      FloatingActionButton(
           onPressed: () {
             setState(() {
               if (_controller.value.isPlaying) {
@@ -53,6 +53,6 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
           child: Icon(
             _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
           )),
-    );
+    ]);
   }
 }

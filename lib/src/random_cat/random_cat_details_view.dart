@@ -45,6 +45,11 @@ class _RandomCatDetailsViewState extends State<RandomCatDetailsView> {
           }
         },
       )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() {}),
+        tooltip: 'Regenerate',
+        child: const Icon(Icons.replay),
+      ),
     );
   }
 }
