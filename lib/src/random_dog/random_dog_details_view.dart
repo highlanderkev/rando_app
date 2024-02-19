@@ -50,6 +50,11 @@ class _RandomDogDetailsViewState extends State<RandomDogDetailsView> {
           }
         },
       )),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => setState(() {}),
+        tooltip: 'Regenerate',
+        child: const Icon(Icons.replay),
+      ),
     );
   }
 }
