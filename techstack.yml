@@ -2,7 +2,7 @@ repo_name: highlanderkev/rando_app
 report_id: f68b6e232e89f2b9408e78158074bf81
 version: 0.1
 repo_type: Public
-timestamp: '2024-01-31T17:12:35+00:00'
+timestamp: '2024-02-29T19:47:27+00:00'
 requested_by: highlanderkev
 provider: github
 branch: main
@@ -73,7 +73,7 @@ tools:
   detection_source_url: https://github.com/highlanderkev/rando_app
   detection_source: Repo Metadata
 - name: Swift
-  description: 'An innovative new programming language for Cocoa and Cocoa Touch. '
+  description: An innovative new programming language for Cocoa and Cocoa Touch.
   website_url: https://developer.apple.com/swift/
   license: Apache-2.0
   open_source: true
@@ -111,7 +111,7 @@ tools:
   last_updated_by: Kevin Westropp
   last_updated_on: 2023-08-10 03:55:23.000000000 Z
 - name: CMake
-  description: 'An open-source system that manages the build process '
+  description: An open-source system that manages the build process
   website_url: http://www.cmake.org/
   open_source: false
   hosted_saas: false
