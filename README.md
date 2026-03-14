@@ -20,7 +20,6 @@ A Flutter application that delivers random content — random numbers, random do
 | Networking | [http](https://pub.dev/packages/http) |
 | Reactive state | [RxDart](https://pub.dev/packages/rxdart) |
 | Video playback | [video_player](https://pub.dev/packages/video_player) |
-| Config | [flutter_dotenv](https://pub.dev/packages/flutter_dotenv) |
 | Localization | Flutter Localizations (ARB files) |
 | CI / Hosting | GitHub Actions + Firebase Hosting |
 
@@ -30,7 +29,6 @@ A Flutter application that delivers random content — random numbers, random do
 
 - [Flutter SDK](https://flutter.dev/docs/get-started/install) (Dart SDK `>=3.1.2 <4.0.0`)
 - A Firebase project with Authentication (Google provider), Firestore, Analytics, and Hosting enabled
-- A `.env` file in the project root (see `.env.example` if provided) containing any required API keys
 
 ### Setup
 
