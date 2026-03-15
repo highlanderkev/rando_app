@@ -4,8 +4,8 @@
 name: Deploy to Firebase Hosting on release
 'on':
   push:
-    branches:
-      - 'release/**'
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       tag_name:
@@ -32,9 +32,8 @@ jobs:
         id: release_info
         run: |
           if [ "${{ github.event_name }}" = "push" ]; then
-            # Extract version from branch name: release/x.y.z -> vx.y.z
-            BRANCH="${{ github.ref_name }}"
-            VERSION="v${BRANCH#release/}"
+            # Use tag name as version when triggered by a tag push (e.g. v1.0.0)
+            VERSION="${{ github.ref_name }}"
             NOTES="Release ${VERSION}"
           else
             VERSION="${{ inputs.tag_name }}"
@@ -88,6 +87,7 @@ jobs:
             echo "Release ${{ steps.release_info.outputs.version }} already exists — skipping creation."
           else
             gh release create "${{ steps.release_info.outputs.version }}" \
+              --target "${{ github.sha }}" \
               --title "${{ steps.release_info.outputs.version }}" \
               --notes "${{ steps.release_info.outputs.notes }}" \
               --latest
