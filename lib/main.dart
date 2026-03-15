@@ -18,8 +18,10 @@ void _validateFirebaseEnv() {
     'FIREBASE_ANDROID_API_KEY',
     'FIREBASE_IOS_API_KEY',
   ];
-  final missing =
-      requiredKeys.where((key) => dotenv.env[key] == null).toList();
+  final missing = requiredKeys.where((key) {
+    final value = dotenv.env[key];
+    return value == null || value.trim().isEmpty;
+  }).toList();
   if (missing.isNotEmpty) {
     throw StateError(
       'Missing required Firebase environment variables: ${missing.join(', ')}. '
