@@ -1,0 +1,29 @@
+# Deploys to Firebase Hosting when a release branch is pushed
+# Release branches follow the pattern: release/x.y.z (e.g. release/1.0.0)
+
+name: Deploy to Firebase Hosting on release
+'on':
+  push:
+    branches:
+      - 'release/**'
+permissions:
+  contents: read
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.16.9'
+          channel: 'stable'
+      - run: touch .env
+      - run: flutter pub get
+      - run: flutter build web
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_RANDO_APP_HIGHLANDERKEV }}'
+          channelId: live
+          projectId: rando-app-highlanderkev
