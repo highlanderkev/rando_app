@@ -4,6 +4,14 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+String _requiredEnv(String key) {
+  final value = dotenv.env[key];
+  if (value == null) {
+    throw StateError('Missing required environment variable: $key');
+  }
+  return value;
+}
+
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
@@ -44,38 +52,38 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions get web => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_WEB_API_KEY']!,
-        appId: dotenv.env['FIREBASE_APP_ID']!,
-        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        apiKey: _requiredEnv('FIREBASE_WEB_API_KEY'),
+        appId: _requiredEnv('FIREBASE_APP_ID'),
+        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
+        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
         authDomain: dotenv.env['FIREBASE_WEB_AUTH_DOMAIN'],
         storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
         measurementId: dotenv.env['FIREBASE_WEB_MEASUREMENT_ID'],
       );
 
   static FirebaseOptions get android => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_ANDROID_API_KEY']!,
-        appId: dotenv.env['FIREBASE_APP_ID']!,
-        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        apiKey: _requiredEnv('FIREBASE_ANDROID_API_KEY'),
+        appId: _requiredEnv('FIREBASE_APP_ID'),
+        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
+        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
         storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
       );
 
   static FirebaseOptions get ios => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_IOS_API_KEY']!,
-        appId: dotenv.env['FIREBASE_APP_ID']!,
-        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        apiKey: _requiredEnv('FIREBASE_IOS_API_KEY'),
+        appId: _requiredEnv('FIREBASE_APP_ID'),
+        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
+        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
         storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
         iosClientId: dotenv.env['FIREBASE_IOS_CLIENT_ID'],
         iosBundleId: dotenv.env['FIREBASE_IOS_BUNDLE_ID'],
       );
 
   static FirebaseOptions get macos => FirebaseOptions(
-        apiKey: dotenv.env['FIREBASE_IOS_API_KEY']!,
-        appId: dotenv.env['FIREBASE_APP_ID']!,
-        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID']!,
-        projectId: dotenv.env['FIREBASE_PROJECT_ID']!,
+        apiKey: _requiredEnv('FIREBASE_IOS_API_KEY'),
+        appId: _requiredEnv('FIREBASE_APP_ID'),
+        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
+        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
         storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
         iosClientId: dotenv.env['FIREBASE_MACOS_CLIENT_ID'],
         iosBundleId: dotenv.env['FIREBASE_MACOS_BUNDLE_ID'],
