@@ -9,8 +9,29 @@ import 'src/auth/auth_service.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 
+void _validateFirebaseEnv() {
+  const requiredKeys = [
+    'FIREBASE_APP_ID',
+    'FIREBASE_MESSAGING_SENDER_ID',
+    'FIREBASE_PROJECT_ID',
+    'FIREBASE_WEB_API_KEY',
+    'FIREBASE_ANDROID_API_KEY',
+    'FIREBASE_IOS_API_KEY',
+  ];
+  final missing =
+      requiredKeys.where((key) => dotenv.env[key] == null).toList();
+  if (missing.isNotEmpty) {
+    throw StateError(
+      'Missing required Firebase environment variables: ${missing.join(', ')}. '
+      'Please check your .env file against .env.example.',
+    );
+  }
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
+  _validateFirebaseEnv();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Set up the SettingsController, which will glue user settings to multiple
   // Flutter Widgets.
