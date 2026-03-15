@@ -1,12 +1,23 @@
-# Deploys to Firebase Hosting when a release branch is pushed
+# Deploys to Firebase Hosting when a release branch is pushed, creates a git tag, and publishes release notes.
 # Release branches follow the pattern: release/x.y.z (e.g. release/1.0.0)
 
 name: Deploy to Firebase Hosting on release
 'on':
+  push:
+    branches:
+      - 'release/**'
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: true
+      release_notes:
+        description: 'Release notes'
+        required: false
+        default: ''
 
 permissions:
-  contents: read
+  contents: write
   deployments: write
   checks: write
   statuses: write
@@ -17,6 +28,27 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
+      - name: Determine version and release notes
+        id: release_info
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Extract version from branch name: release/x.y.z -> vx.y.z
+            BRANCH="${{ github.ref_name }}"
+            VERSION="v${BRANCH#release/}"
+            NOTES="Release ${VERSION}"
+          else
+            VERSION="${{ inputs.tag_name }}"
+            NOTES="${{ inputs.release_notes }}"
+            if [ -z "$NOTES" ]; then
+              NOTES="Release ${VERSION}"
+            fi
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          {
+            echo "notes<<EOF"
+            echo "$NOTES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.9'
@@ -48,3 +80,15 @@ jobs:
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_RANDO_APP_HIGHLANDERKEV }}'
           channelId: live
           projectId: rando-app-highlanderkev
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "${{ steps.release_info.outputs.version }}" > /dev/null 2>&1; then
+            echo "Release ${{ steps.release_info.outputs.version }} already exists — skipping creation."
+          else
+            gh release create "${{ steps.release_info.outputs.version }}" \
+              --title "${{ steps.release_info.outputs.version }}" \
+              --notes "${{ steps.release_info.outputs.notes }}" \
+              --latest
+          fi
