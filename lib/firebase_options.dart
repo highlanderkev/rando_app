@@ -6,7 +6,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 String _requiredEnv(String key) {
   final value = dotenv.env[key];
-  if (value == null) {
+  if (value == null || value.trim().isEmpty) {
     throw StateError('Missing required environment variable: $key');
   }
   return value;
