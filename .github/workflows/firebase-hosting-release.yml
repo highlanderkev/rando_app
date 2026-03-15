@@ -3,15 +3,18 @@
 
 name: Deploy to Firebase Hosting on release
 'on':
-  push:
-    branches:
-      - 'release/**'
+  workflow_dispatch:
+
 permissions:
   contents: read
+  deployments: write
+  checks: write
+  statuses: write
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
