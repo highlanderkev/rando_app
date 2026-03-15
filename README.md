@@ -74,3 +74,25 @@ Localized strings live in `lib/src/localization/`. To add a new language, create
 ## Deployment
 
 Pull requests and merges to `main` are automatically deployed to Firebase Hosting via GitHub Actions.
+
+### Release Branching Strategy
+
+Releases are isolated to dedicated `release/<version>` branches (e.g. `release/1.0.0`). Pushing to a release branch triggers a separate CI workflow that builds and deploys the app to the Firebase Hosting live channel, keeping production releases independent from day-to-day `main` branch activity.
+
+**Creating a release:**
+
+```bash
+# Create and push a release branch (replace x.y.z with the version number)
+git checkout -b release/1.0.0
+git push origin release/1.0.0
+# → triggers the "Deploy to Firebase Hosting on release" workflow
+# → builds and deploys to the Firebase Hosting live channel
+```
+
+**Workflow summary:**
+
+| Event | Branch | Deploys to |
+|-------|--------|-----------|
+| Merge / push | `main` | Firebase Hosting live |
+| Push | `release/**` | Firebase Hosting live |
+| Pull request | any | Firebase Hosting preview channel |
