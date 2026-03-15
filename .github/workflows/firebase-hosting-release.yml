@@ -1,5 +1,5 @@
-# Deploys to Firebase Hosting when a release branch is pushed, creates a git tag, and publishes release notes.
-# Release branches follow the pattern: release/x.y.z (e.g. release/1.0.0)
+# Deploys to Firebase Hosting when a release tag is pushed and publishes release notes.
+# Release tags follow the pattern: vX.Y.Z (e.g. v1.0.0)
 
 name: Deploy to Firebase Hosting on release
 'on':
