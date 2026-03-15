@@ -1,11 +1,11 @@
-# Deploys to Firebase Hosting when a release tag is pushed and publishes release notes.
-# Release tags follow the pattern: vX.Y.Z (e.g. v1.0.0)
+# Deploys to Firebase Hosting when a release branch is pushed, creates a git tag, and publishes release notes.
+# Release branches follow the pattern: release/x.y.z (e.g. release/1.0.0)
 
 name: Deploy to Firebase Hosting on release
 'on':
   push:
-    tags:
-      - 'v*.*.*'
+    branches:
+      - 'release/**'
   workflow_dispatch:
     inputs:
       tag_name:
@@ -37,22 +37,25 @@ jobs:
           INPUT_RELEASE_NOTES: ${{ inputs.release_notes }}
         run: |
           if [ "$EVENT_NAME" = "push" ]; then
-            # Use tag name as version when triggered by a tag push (e.g. v1.0.0)
-            VERSION="$REF_NAME"
+            # Derive version from branch name: release/1.2.3 → v1.2.3
+            VERSION="v${REF_NAME#release/}"
             NOTES="Release ${VERSION}"
           else
             VERSION="$INPUT_TAG_NAME"
+            # Validate tag_name matches vX.Y.Z
+            if ! echo "$VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+              echo "Error: tag_name '${VERSION}' does not match expected format vX.Y.Z" >&2
+              exit 1
+            fi
             NOTES="$INPUT_RELEASE_NOTES"
             if [ -z "$NOTES" ]; then
               NOTES="Release ${VERSION}"
             fi
           fi
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          {
-            echo "notes<<EOF"
-            echo "$NOTES"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          NOTES_FILE=$(mktemp)
+          printf '%s' "$NOTES" > "$NOTES_FILE"
+          echo "NOTES_FILE=$NOTES_FILE" >> "$GITHUB_ENV"
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.9'
@@ -88,7 +91,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_VERSION: ${{ steps.release_info.outputs.version }}
-          RELEASE_NOTES: ${{ steps.release_info.outputs.notes }}
           RELEASE_TARGET: ${{ github.sha }}
         run: |
           if gh release view "$RELEASE_VERSION" > /dev/null 2>&1; then
@@ -97,6 +99,6 @@ jobs:
             gh release create "$RELEASE_VERSION" \
               --target "$RELEASE_TARGET" \
               --title "$RELEASE_VERSION" \
-              --notes "$RELEASE_NOTES" \
+              --notes-file "$NOTES_FILE" \
               --latest
           fi
