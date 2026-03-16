@@ -168,6 +168,7 @@ class _ParallaxBackgroundState extends State<_ParallaxBackground> {
           widget.item.imageUrl,
           key: _backgroundImageKey,
           fit: BoxFit.cover,
+          excludeFromSemantics: true,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return ColoredBox(
