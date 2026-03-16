@@ -69,22 +69,25 @@ class _ParallaxCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.pushNamed(context, item.routeName, arguments: item);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: AspectRatio(
-          aspectRatio: 16 / 9,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Stack(
-              children: [
-                _ParallaxBackground(item: item),
-                _buildGradientOverlay(),
-                _buildTitleText(),
-              ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AspectRatio(
+        aspectRatio: 16 / 9,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, item.routeName, arguments: item);
+              },
+              child: Stack(
+                children: [
+                  _ParallaxBackground(item: item),
+                  _buildGradientOverlay(),
+                  _buildTitleText(),
+                ],
+              ),
             ),
           ),
         ),

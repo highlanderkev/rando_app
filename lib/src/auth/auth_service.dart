@@ -61,15 +61,16 @@ class AuthService {
 
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-    if (googleAuth.idToken == null) {
+    if (googleAuth.idToken == null && googleAuth.accessToken == null) {
       throw FirebaseAuthException(
-        code: 'missing-id-token',
-        message: 'Google Sign-In did not return an ID token.',
+        code: 'missing-google-auth-token',
+        message: 'Google Sign-In did not return an ID token or access token.',
       );
     }
 
     final credential = GoogleAuthProvider.credential(
       idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
     );
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
