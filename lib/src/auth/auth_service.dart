@@ -7,6 +7,8 @@ import 'user_profile.dart';
 
 class AuthService {
   static const String collectionName = 'users';
+  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
+  bool _googleSignInInitialized = false;
 
   // Future<User> listenForAuthStateChanges() async {
   //   return FirebaseAuth.instance.authStateChanges().listen((User? user) {
@@ -54,15 +56,32 @@ class AuthService {
   }
 
   Future<UserCredential> signInWithGoogle() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    await _ensureGoogleSignInInitialized();
+    final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
 
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
+    if (googleAuth.idToken == null) {
+      throw FirebaseAuthException(
+        code: 'missing-google-auth-token',
+        message: 'Google Sign-In did not return an ID token.',
+      );
+    }
 
     final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken, idToken: googleAuth?.idToken);
+      idToken: googleAuth.idToken,
+    );
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<void> _ensureGoogleSignInInitialized() async {
+    if (_googleSignInInitialized) {
+      return;
+    }
+
+    await _googleSignIn.initialize();
+    _googleSignInInitialized = true;
   }
 
   Future<UserProfile> getUserProfile(User user) async {

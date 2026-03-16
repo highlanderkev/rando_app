@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:rando_app/src/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:rando_app/src/auth/login_view.dart';
 import 'package:rando_app/src/random_cat/random_cat_details_view.dart';
