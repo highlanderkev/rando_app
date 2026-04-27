@@ -15,26 +15,25 @@
 #          --project=rando-app-highlanderkev
 
 substitutions:
-  _FIREBASE_PROJECT_ID: rando-app-highlanderkev
   # Firebase App Distribution group to distribute the staging APK to
   _DISTRIBUTION_GROUP: staging-testers
 
 steps:
   # Create an empty .env so flutter_dotenv is satisfied; real config is
   # injected at compile time via --dart-define (see build-apk step).
-  - name: 'ubuntu'
+  - name: 'ubuntu:22.04'
     id: 'create-env'
     entrypoint: 'bash'
     args: ['-c', 'touch .env']
 
   # Install pub dependencies
-  - name: 'ghcr.io/cirruslabs/flutter:stable'
+  - name: 'ghcr.io/cirruslabs/flutter:3.29.3'
     id: 'pub-get'
     entrypoint: 'flutter'
     args: ['pub', 'get']
 
   # Build Flutter Android APK (release mode) – Firebase config injected at compile time
-  - name: 'ghcr.io/cirruslabs/flutter:stable'
+  - name: 'ghcr.io/cirruslabs/flutter:3.29.3'
     id: 'build-apk'
     entrypoint: 'bash'
     args:
@@ -54,18 +53,18 @@ steps:
       - FIREBASE_STORAGE_BUCKET
 
   # Distribute APK via Firebase App Distribution to staging testers
-  - name: 'node:lts-slim'
+  - name: 'node:20.19.0-slim'
     id: 'distribute'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        npm install --global --quiet firebase-tools
+        npm install --global --quiet firebase-tools@13.27.0
         firebase appdistribution:distribute \
           build/app/outputs/flutter-apk/app-release.apk \
           --app "$$FIREBASE_APP_ID" \
           --groups "$_DISTRIBUTION_GROUP" \
-          --project "$_FIREBASE_PROJECT_ID" \
+          --project "$PROJECT_ID" \
           --token "$$FIREBASE_CI_TOKEN"
     secretEnv:
       - FIREBASE_APP_ID
