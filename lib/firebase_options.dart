@@ -4,12 +4,24 @@ import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-String _requiredEnv(String key) {
+// Returns the value injected at compile time via --dart-define (CI builds),
+// or falls back to the runtime .env file (local development).
+String _env(String key, String dartDefineValue) {
+  if (dartDefineValue.trim().isNotEmpty) return dartDefineValue.trim();
   final value = dotenv.env[key];
   if (value == null || value.trim().isEmpty) {
-    throw StateError('Missing required environment variable: $key');
+    throw StateError(
+      'Missing required environment variable: $key. '
+      'Pass it via --dart-define=$key=VALUE or add it to .env.',
+    );
   }
   return value;
+}
+
+// Optional env value; returns null if not set by either source.
+String? _optionalEnv(String key, String dartDefineValue) {
+  if (dartDefineValue.trim().isNotEmpty) return dartDefineValue.trim();
+  return dotenv.env[key];
 }
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
@@ -52,40 +64,66 @@ class DefaultFirebaseOptions {
   }
 
   static FirebaseOptions get web => FirebaseOptions(
-        apiKey: _requiredEnv('FIREBASE_WEB_API_KEY'),
-        appId: _requiredEnv('FIREBASE_APP_ID'),
-        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
-        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
-        authDomain: dotenv.env['FIREBASE_WEB_AUTH_DOMAIN'],
-        storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
-        measurementId: dotenv.env['FIREBASE_WEB_MEASUREMENT_ID'],
+        apiKey: _env('FIREBASE_WEB_API_KEY',
+            const String.fromEnvironment('FIREBASE_WEB_API_KEY')),
+        appId: _env('FIREBASE_APP_ID',
+            const String.fromEnvironment('FIREBASE_APP_ID')),
+        messagingSenderId: _env('FIREBASE_MESSAGING_SENDER_ID',
+            const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID')),
+        projectId: _env('FIREBASE_PROJECT_ID',
+            const String.fromEnvironment('FIREBASE_PROJECT_ID')),
+        authDomain: _optionalEnv('FIREBASE_WEB_AUTH_DOMAIN',
+            const String.fromEnvironment('FIREBASE_WEB_AUTH_DOMAIN')),
+        storageBucket: _optionalEnv('FIREBASE_STORAGE_BUCKET',
+            const String.fromEnvironment('FIREBASE_STORAGE_BUCKET')),
+        measurementId: _optionalEnv('FIREBASE_WEB_MEASUREMENT_ID',
+            const String.fromEnvironment('FIREBASE_WEB_MEASUREMENT_ID')),
       );
 
   static FirebaseOptions get android => FirebaseOptions(
-        apiKey: _requiredEnv('FIREBASE_ANDROID_API_KEY'),
-        appId: _requiredEnv('FIREBASE_APP_ID'),
-        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
-        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
-        storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
+        apiKey: _env('FIREBASE_ANDROID_API_KEY',
+            const String.fromEnvironment('FIREBASE_ANDROID_API_KEY')),
+        appId: _env('FIREBASE_APP_ID',
+            const String.fromEnvironment('FIREBASE_APP_ID')),
+        messagingSenderId: _env('FIREBASE_MESSAGING_SENDER_ID',
+            const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID')),
+        projectId: _env('FIREBASE_PROJECT_ID',
+            const String.fromEnvironment('FIREBASE_PROJECT_ID')),
+        storageBucket: _optionalEnv('FIREBASE_STORAGE_BUCKET',
+            const String.fromEnvironment('FIREBASE_STORAGE_BUCKET')),
       );
 
   static FirebaseOptions get ios => FirebaseOptions(
-        apiKey: _requiredEnv('FIREBASE_IOS_API_KEY'),
-        appId: _requiredEnv('FIREBASE_APP_ID'),
-        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
-        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
-        storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
-        iosClientId: dotenv.env['FIREBASE_IOS_CLIENT_ID'],
-        iosBundleId: dotenv.env['FIREBASE_IOS_BUNDLE_ID'],
+        apiKey: _env('FIREBASE_IOS_API_KEY',
+            const String.fromEnvironment('FIREBASE_IOS_API_KEY')),
+        appId: _env('FIREBASE_APP_ID',
+            const String.fromEnvironment('FIREBASE_APP_ID')),
+        messagingSenderId: _env('FIREBASE_MESSAGING_SENDER_ID',
+            const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID')),
+        projectId: _env('FIREBASE_PROJECT_ID',
+            const String.fromEnvironment('FIREBASE_PROJECT_ID')),
+        storageBucket: _optionalEnv('FIREBASE_STORAGE_BUCKET',
+            const String.fromEnvironment('FIREBASE_STORAGE_BUCKET')),
+        iosClientId: _optionalEnv('FIREBASE_IOS_CLIENT_ID',
+            const String.fromEnvironment('FIREBASE_IOS_CLIENT_ID')),
+        iosBundleId: _optionalEnv('FIREBASE_IOS_BUNDLE_ID',
+            const String.fromEnvironment('FIREBASE_IOS_BUNDLE_ID')),
       );
 
   static FirebaseOptions get macos => FirebaseOptions(
-        apiKey: _requiredEnv('FIREBASE_IOS_API_KEY'),
-        appId: _requiredEnv('FIREBASE_APP_ID'),
-        messagingSenderId: _requiredEnv('FIREBASE_MESSAGING_SENDER_ID'),
-        projectId: _requiredEnv('FIREBASE_PROJECT_ID'),
-        storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'],
-        iosClientId: dotenv.env['FIREBASE_MACOS_CLIENT_ID'],
-        iosBundleId: dotenv.env['FIREBASE_MACOS_BUNDLE_ID'],
+        apiKey: _env('FIREBASE_IOS_API_KEY',
+            const String.fromEnvironment('FIREBASE_IOS_API_KEY')),
+        appId: _env('FIREBASE_APP_ID',
+            const String.fromEnvironment('FIREBASE_APP_ID')),
+        messagingSenderId: _env('FIREBASE_MESSAGING_SENDER_ID',
+            const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID')),
+        projectId: _env('FIREBASE_PROJECT_ID',
+            const String.fromEnvironment('FIREBASE_PROJECT_ID')),
+        storageBucket: _optionalEnv('FIREBASE_STORAGE_BUCKET',
+            const String.fromEnvironment('FIREBASE_STORAGE_BUCKET')),
+        iosClientId: _optionalEnv('FIREBASE_MACOS_CLIENT_ID',
+            const String.fromEnvironment('FIREBASE_MACOS_CLIENT_ID')),
+        iosBundleId: _optionalEnv('FIREBASE_MACOS_BUNDLE_ID',
+            const String.fromEnvironment('FIREBASE_MACOS_BUNDLE_ID')),
       );
 }

@@ -1,3 +1,4 @@
+import 'dart:io' show FileSystemException;
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,46 +11,71 @@ import 'src/auth/auth_service.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 
-void _validateFirebaseEnv() {
-  // Keys that are shared across all platforms.
-  final requiredKeys = <String>[
-    'FIREBASE_APP_ID',
-    'FIREBASE_MESSAGING_SENDER_ID',
-    'FIREBASE_PROJECT_ID',
-  ];
+bool _hasEnv(String key, String dartDefineValue) {
+  if (dartDefineValue.trim().isNotEmpty) return true;
+  final v = dotenv.env[key];
+  return v != null && v.trim().isNotEmpty;
+}
 
-  // Only require platform-specific API keys for the current platform.
+void _validateFirebaseEnv() {
+  // Config is injected at compile time via --dart-define (CI) or read at
+  // runtime from .env (local development). Check both sources for each key.
+  final missing = <String>[];
+
+  if (!_hasEnv('FIREBASE_APP_ID',
+      const String.fromEnvironment('FIREBASE_APP_ID'))) {
+    missing.add('FIREBASE_APP_ID');
+  }
+  if (!_hasEnv('FIREBASE_MESSAGING_SENDER_ID',
+      const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'))) {
+    missing.add('FIREBASE_MESSAGING_SENDER_ID');
+  }
+  if (!_hasEnv('FIREBASE_PROJECT_ID',
+      const String.fromEnvironment('FIREBASE_PROJECT_ID'))) {
+    missing.add('FIREBASE_PROJECT_ID');
+  }
+
   if (kIsWeb) {
-    requiredKeys.add('FIREBASE_WEB_API_KEY');
+    if (!_hasEnv('FIREBASE_WEB_API_KEY',
+        const String.fromEnvironment('FIREBASE_WEB_API_KEY'))) {
+      missing.add('FIREBASE_WEB_API_KEY');
+    }
   } else {
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        requiredKeys.add('FIREBASE_ANDROID_API_KEY');
+        if (!_hasEnv('FIREBASE_ANDROID_API_KEY',
+            const String.fromEnvironment('FIREBASE_ANDROID_API_KEY'))) {
+          missing.add('FIREBASE_ANDROID_API_KEY');
+        }
         break;
       case TargetPlatform.iOS:
-        requiredKeys.add('FIREBASE_IOS_API_KEY');
+        if (!_hasEnv('FIREBASE_IOS_API_KEY',
+            const String.fromEnvironment('FIREBASE_IOS_API_KEY'))) {
+          missing.add('FIREBASE_IOS_API_KEY');
+        }
         break;
       default:
-        // Other platforms may not use these specific API keys.
         break;
     }
   }
 
-  final missing = requiredKeys.where((key) {
-    final value = dotenv.env[key];
-    return value == null || value.trim().isEmpty;
-  }).toList();
   if (missing.isNotEmpty) {
     throw StateError(
       'Missing required Firebase environment variables: ${missing.join(', ')}. '
-      'Please check your .env file against .env.example.',
+      'Pass them via --dart-define or add them to .env.',
     );
   }
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env');
+  // Load .env for local development. In CI builds secrets are injected via
+  // --dart-define so the file may not exist; silently skip in that case.
+  try {
+    await dotenv.load(fileName: '.env');
+  } on FileSystemException {
+    // .env absent – configuration will come from --dart-define values.
+  }
   _validateFirebaseEnv();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   // Set up the SettingsController, which will glue user settings to multiple
