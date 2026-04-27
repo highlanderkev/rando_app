@@ -1,0 +1,114 @@
+# Google Cloud Build – Flutter web build + Firebase Hosting live deployment.
+#
+# One-time setup checklist:
+#   1. Enable APIs in your GCP project (rando-app-highlanderkev):
+#        gcloud services enable cloudbuild.googleapis.com secretmanager.googleapis.com
+#
+#   2. Create the following secrets in GCP Secret Manager:
+#        gcloud secrets create FIREBASE_WEB_API_KEY          --replication-policy=automatic
+#        gcloud secrets create FIREBASE_APP_ID               --replication-policy=automatic
+#        gcloud secrets create FIREBASE_MESSAGING_SENDER_ID  --replication-policy=automatic
+#        gcloud secrets create FIREBASE_PROJECT_ID           --replication-policy=automatic
+#        gcloud secrets create FIREBASE_WEB_AUTH_DOMAIN      --replication-policy=automatic
+#        gcloud secrets create FIREBASE_STORAGE_BUCKET       --replication-policy=automatic
+#        gcloud secrets create FIREBASE_WEB_MEASUREMENT_ID   --replication-policy=automatic
+#        gcloud secrets create FIREBASE_CI_TOKEN             --replication-policy=automatic
+#      Populate each secret:
+#        echo -n "VALUE" | gcloud secrets versions add SECRET_NAME --data-file=-
+#      Obtain the Firebase CI token:
+#        firebase login:ci
+#
+#   3. Grant the Cloud Build service account access to Secret Manager:
+#        PROJECT_NUMBER=$(gcloud projects describe rando-app-highlanderkev --format='value(projectNumber)')
+#        gcloud projects add-iam-policy-binding rando-app-highlanderkev \
+#          --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
+#          --role="roles/secretmanager.secretAccessor"
+#
+#   4. Create a Cloud Build trigger for production deploys (push to release/**):
+#        gcloud builds triggers create github \
+#          --repo-name=rando_app \
+#          --repo-owner=highlanderkev \
+#          --branch-pattern="^release/.*" \
+#          --build-config=cloudbuild.yaml \
+#          --project=rando-app-highlanderkev
+#
+#   For staging deploys (push to main) use cloudbuild.staging.yaml instead.
+
+substitutions:
+  _FIREBASE_PROJECT_ID: rando-app-highlanderkev
+
+steps:
+  # Write Firebase configuration to .env from Secret Manager
+  - name: 'ubuntu'
+    id: 'create-env'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        printf '%s\n' \
+          "FIREBASE_WEB_API_KEY=$$FIREBASE_WEB_API_KEY" \
+          "FIREBASE_APP_ID=$$FIREBASE_APP_ID" \
+          "FIREBASE_MESSAGING_SENDER_ID=$$FIREBASE_MESSAGING_SENDER_ID" \
+          "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID" \
+          "FIREBASE_WEB_AUTH_DOMAIN=$$FIREBASE_WEB_AUTH_DOMAIN" \
+          "FIREBASE_STORAGE_BUCKET=$$FIREBASE_STORAGE_BUCKET" \
+          "FIREBASE_WEB_MEASUREMENT_ID=$$FIREBASE_WEB_MEASUREMENT_ID" \
+          > .env
+    secretEnv:
+      - FIREBASE_WEB_API_KEY
+      - FIREBASE_APP_ID
+      - FIREBASE_MESSAGING_SENDER_ID
+      - FIREBASE_PROJECT_ID
+      - FIREBASE_WEB_AUTH_DOMAIN
+      - FIREBASE_STORAGE_BUCKET
+      - FIREBASE_WEB_MEASUREMENT_ID
+
+  # Install pub dependencies
+  - name: 'ghcr.io/cirruslabs/flutter:stable'
+    id: 'pub-get'
+    entrypoint: 'flutter'
+    args: ['pub', 'get']
+
+  # Build Flutter web (release mode)
+  - name: 'ghcr.io/cirruslabs/flutter:stable'
+    id: 'build-web'
+    entrypoint: 'flutter'
+    args: ['build', 'web', '--release']
+
+  # Deploy to Firebase Hosting live channel
+  - name: 'node:lts-slim'
+    id: 'deploy'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        npm install --global --quiet firebase-tools
+        firebase deploy --only hosting \
+          --project "$_FIREBASE_PROJECT_ID" \
+          --token "$$FIREBASE_CI_TOKEN"
+    secretEnv:
+      - FIREBASE_CI_TOKEN
+
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_WEB_API_KEY/versions/latest
+      env: FIREBASE_WEB_API_KEY
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_APP_ID/versions/latest
+      env: FIREBASE_APP_ID
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_MESSAGING_SENDER_ID/versions/latest
+      env: FIREBASE_MESSAGING_SENDER_ID
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_PROJECT_ID/versions/latest
+      env: FIREBASE_PROJECT_ID
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_WEB_AUTH_DOMAIN/versions/latest
+      env: FIREBASE_WEB_AUTH_DOMAIN
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_STORAGE_BUCKET/versions/latest
+      env: FIREBASE_STORAGE_BUCKET
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_WEB_MEASUREMENT_ID/versions/latest
+      env: FIREBASE_WEB_MEASUREMENT_ID
+    - versionName: projects/$PROJECT_ID/secrets/FIREBASE_CI_TOKEN/versions/latest
+      env: FIREBASE_CI_TOKEN
+
+timeout: 1800s
+
+options:
+  logging: CLOUD_LOGGING_ONLY
