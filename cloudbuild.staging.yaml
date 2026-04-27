@@ -4,9 +4,16 @@
 # group instead of "production-testers".
 #
 # One-time setup:
-#   Follow the same checklist in cloudbuild.yaml (secrets, IAM, APIs, GCS bucket).
+#   1. Follow steps 1–3 in cloudbuild.yaml (enable APIs, create secrets, grant Secret Manager access).
 #
-#   Create a Cloud Build trigger for staging (push to main):
+#   2. Create (or reuse) the GCS bucket used for artifact storage and grant write access:
+#        PROJECT_NUMBER=$(gcloud projects describe YOUR_PROJECT_ID --format='value(projectNumber)')
+#        gsutil mb -p YOUR_PROJECT_ID gs://YOUR_PROJECT_ID-builds
+#        gcloud projects add-iam-policy-binding YOUR_PROJECT_ID \
+#          --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
+#          --role="roles/storage.objectCreator"
+#
+#   3. Create a Cloud Build trigger for staging (push to main):
 #        gcloud builds triggers create github \
 #          --repo-name=rando_app \
 #          --repo-owner=highlanderkev \
