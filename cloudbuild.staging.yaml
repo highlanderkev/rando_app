@@ -4,7 +4,7 @@
 # group instead of "production-testers".
 #
 # One-time setup:
-#   Follow the same checklist in cloudbuild.yaml (secrets, IAM, APIs).
+#   Follow the same checklist in cloudbuild.yaml (secrets, IAM, APIs, GCS bucket).
 #
 #   Create a Cloud Build trigger for staging (push to main):
 #        gcloud builds triggers create github \
@@ -20,26 +20,12 @@ substitutions:
   _DISTRIBUTION_GROUP: staging-testers
 
 steps:
-  # Write Firebase configuration to .env from Secret Manager
+  # Create an empty .env so flutter_dotenv is satisfied; real config is
+  # injected at compile time via --dart-define (see build-apk step).
   - name: 'ubuntu'
     id: 'create-env'
     entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        printf '%s\n' \
-          "FIREBASE_ANDROID_API_KEY=$$FIREBASE_ANDROID_API_KEY" \
-          "FIREBASE_APP_ID=$$FIREBASE_APP_ID" \
-          "FIREBASE_MESSAGING_SENDER_ID=$$FIREBASE_MESSAGING_SENDER_ID" \
-          "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID" \
-          "FIREBASE_STORAGE_BUCKET=$$FIREBASE_STORAGE_BUCKET" \
-          > .env
-    secretEnv:
-      - FIREBASE_ANDROID_API_KEY
-      - FIREBASE_APP_ID
-      - FIREBASE_MESSAGING_SENDER_ID
-      - FIREBASE_PROJECT_ID
-      - FIREBASE_STORAGE_BUCKET
+    args: ['-c', 'touch .env']
 
   # Install pub dependencies
   - name: 'ghcr.io/cirruslabs/flutter:stable'
@@ -47,11 +33,25 @@ steps:
     entrypoint: 'flutter'
     args: ['pub', 'get']
 
-  # Build Flutter Android APK (release mode)
+  # Build Flutter Android APK (release mode) – Firebase config injected at compile time
   - name: 'ghcr.io/cirruslabs/flutter:stable'
     id: 'build-apk'
-    entrypoint: 'flutter'
-    args: ['build', 'apk', '--release']
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        flutter build apk --release \
+          --dart-define=FIREBASE_ANDROID_API_KEY=$$FIREBASE_ANDROID_API_KEY \
+          --dart-define=FIREBASE_APP_ID=$$FIREBASE_APP_ID \
+          --dart-define=FIREBASE_MESSAGING_SENDER_ID=$$FIREBASE_MESSAGING_SENDER_ID \
+          --dart-define=FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID \
+          --dart-define=FIREBASE_STORAGE_BUCKET=$$FIREBASE_STORAGE_BUCKET
+    secretEnv:
+      - FIREBASE_ANDROID_API_KEY
+      - FIREBASE_APP_ID
+      - FIREBASE_MESSAGING_SENDER_ID
+      - FIREBASE_PROJECT_ID
+      - FIREBASE_STORAGE_BUCKET
 
   # Distribute APK via Firebase App Distribution to staging testers
   - name: 'node:lts-slim'

@@ -22,7 +22,13 @@
 #          --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
 #          --role="roles/secretmanager.secretAccessor"
 #
-#   4. Create a Cloud Build trigger for production deploys (push to release/**):
+#   4. Create (or reuse) the GCS bucket used for artifact storage and grant write access:
+#        gsutil mb -p rando-app-highlanderkev gs://rando-app-highlanderkev-builds
+#        gcloud projects add-iam-policy-binding rando-app-highlanderkev \
+#          --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
+#          --role="roles/storage.objectCreator"
+#
+#   5. Create a Cloud Build trigger for production deploys (push to release/**):
 #        gcloud builds triggers create github \
 #          --repo-name=rando_app \
 #          --repo-owner=highlanderkev \
@@ -38,26 +44,12 @@ substitutions:
   _DISTRIBUTION_GROUP: production-testers
 
 steps:
-  # Write Firebase configuration to .env from Secret Manager
+  # Create an empty .env so flutter_dotenv is satisfied; real config is
+  # injected at compile time via --dart-define (see build-apk step).
   - name: 'ubuntu'
     id: 'create-env'
     entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        printf '%s\n' \
-          "FIREBASE_ANDROID_API_KEY=$$FIREBASE_ANDROID_API_KEY" \
-          "FIREBASE_APP_ID=$$FIREBASE_APP_ID" \
-          "FIREBASE_MESSAGING_SENDER_ID=$$FIREBASE_MESSAGING_SENDER_ID" \
-          "FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID" \
-          "FIREBASE_STORAGE_BUCKET=$$FIREBASE_STORAGE_BUCKET" \
-          > .env
-    secretEnv:
-      - FIREBASE_ANDROID_API_KEY
-      - FIREBASE_APP_ID
-      - FIREBASE_MESSAGING_SENDER_ID
-      - FIREBASE_PROJECT_ID
-      - FIREBASE_STORAGE_BUCKET
+    args: ['-c', 'touch .env']
 
   # Install pub dependencies
   - name: 'ghcr.io/cirruslabs/flutter:stable'
@@ -65,11 +57,25 @@ steps:
     entrypoint: 'flutter'
     args: ['pub', 'get']
 
-  # Build Flutter Android APK (release mode)
+  # Build Flutter Android APK (release mode) – Firebase config injected at compile time
   - name: 'ghcr.io/cirruslabs/flutter:stable'
     id: 'build-apk'
-    entrypoint: 'flutter'
-    args: ['build', 'apk', '--release']
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        flutter build apk --release \
+          --dart-define=FIREBASE_ANDROID_API_KEY=$$FIREBASE_ANDROID_API_KEY \
+          --dart-define=FIREBASE_APP_ID=$$FIREBASE_APP_ID \
+          --dart-define=FIREBASE_MESSAGING_SENDER_ID=$$FIREBASE_MESSAGING_SENDER_ID \
+          --dart-define=FIREBASE_PROJECT_ID=$$FIREBASE_PROJECT_ID \
+          --dart-define=FIREBASE_STORAGE_BUCKET=$$FIREBASE_STORAGE_BUCKET
+    secretEnv:
+      - FIREBASE_ANDROID_API_KEY
+      - FIREBASE_APP_ID
+      - FIREBASE_MESSAGING_SENDER_ID
+      - FIREBASE_PROJECT_ID
+      - FIREBASE_STORAGE_BUCKET
 
   # Distribute APK via Firebase App Distribution
   - name: 'node:lts-slim'
